@@ -50,10 +50,10 @@
             </div>
         {% endif %}
         <div class="row">
-            <div class="col-3">
+            <div class="col-md-3 col-6">
                 <a href="{% url 'following_profile' profile.id %}"><span class="font-weight-bold" id="following-count">{{ profile.count_following }}</span> Following</a>
             </div>
-            <div class="col-3">
+            <div class="col-md-3 col-6">
                 <a href="{% url 'follower_profile' profile.id %}"><span class="font-weight-bold" id="follower-count">{{ profile.count_follower }}</span> Followers</a>
             </div>
         </div>
