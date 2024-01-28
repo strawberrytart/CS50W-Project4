@@ -1,0 +1,144 @@
+{% extends 'network/layout.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="container mb-3">
+        {% if profile.banner %}
+            <div class="row banner">
+                <img id="banner" src="{{ profile.banner.url }}">
+            </div>
+        {% else %}
+            <div class="row empty_banner">
+            </div>
+        {% endif %}
+
+        <div class="row my-3">
+            <img id="profile_image" src="{{ profile.profile_image.url }}">
+        </div>
+        <div class="row my-3">
+            <div class="col">
+                <p class="font-weight-bold">{{ profile.username }}</p>
+            </div>
+
+            <!--Show the Edit Profile button for logged in users who are viewing their own page -->
+            {% if user.is_authenticated %}
+                {% if request.user.id == profile.id %}
+                    <div class="col-3">
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#profileImageModal" id="editProfileButton">
+                            Edit Profile
+                        </button>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="col">
+                {% if user.is_authenticated %}
+                    {% if profile.id is not request.user.id %}
+                        {% if following %}
+                            <button id='follow-button' class="unfollow" data-id="{{ profile.id }}">Unfollow</button>
+                        {% else %}
+                            <button id='follow-button' class="" data-id="{{ profile.id }}">Follow</button>
+                        {% endif %}                        
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% if profile.bio %}
+            <div class="row">
+                <div class ="col-lg-9 my-3">
+                    {{ profile.bio }}
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-3">
+                <a href="{% url 'following_profile' profile.id %}"><span class="font-weight-bold" id="following-count">{{ profile.count_following }}</span> Following</a>
+            </div>
+            <div class="col-3">
+                <a href="{% url 'follower_profile' profile.id %}"><span class="font-weight-bold" id="follower-count">{{ profile.count_follower }}</span> Followers</a>
+            </div>
+        </div>
+    </div>
+    <hr >
+    <div class="container">
+        {% for post in posts %}
+            <div class="row mb-3">
+                <div class="col-lg-9 postContainer">
+                    <div class="row justify-content-around my-2">
+                        <div class="col">
+                            <a href="{% url 'profile' post.poster.id %}">
+                            <img src="{{ post.poster.profile_image.url }}" width="40" height="40" class="rounded-circle mr-2">
+                            <span class="d-lg-inline mx-1 username">{{ post.poster }}</span>
+                            </a>
+                            <span class="d-block d-md-inline timestamp"> <small>{{ post.timestamp|date:"F j, Y f A" }}</small></span>
+                        </div>
+                        {% if post.poster.id == request.user.id %}
+                            <div class="col text-right">
+                                <div class="edit-button" data-id="{{ post.id }}" id="edit-button-{{ post.id }}"><i class="bi bi-pencil-square"></i></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="row mt-2 mb-4">
+                    <div class="col-12" id="post-content-{{ post.id }}" style="word-wrap:break-word;">{{ post.body }}</div>
+                    </div>
+                    <div class="row justify-content-between my-2 text-center">
+                    <div class="col">
+                        <div class="row">
+                        <div class="col-3 px-0 text-right">
+                            {% if request.user in post.likes.all %}
+                            <ion-icon name="heart" class="large-font active heart" id="like-{{ post.id }}" data-id="{{ post.id }}" data-action="unlike">
+                            </ion-icon>
+                            {% else %}
+                            <ion-icon name="heart" class="large-font heart" id="like-{{ post.id }}" data-id="{{ post.id }}" data-action="like">
+                            </ion-icon>
+                            {% endif %}
+                        </div>
+                        <div class="col-3 text-left" id="like-count-{{ post.id }}">
+                            <!-- Show the total likes of a post-->
+                            {{ post.count_likes }}
+                        </div>
+                        </div>   
+                    </div>
+                    <div class="col" id="">
+                        <i class="bi bi-chat-right-text"></i>
+                        Comment
+                    </div>
+                    <div class="col" id="">
+                        <i class="bi bi-share-fill"></i>
+                        Share
+                    </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        
+    </div>
+
+    <!-- Modal -->
+    {% if user.is_authenticated %}
+        <div class="modal fade" id="profileImageModal" tabindex="-1" role="dialog" aria-labelledby="profileImageModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                <h5 class="modal-title" id="profileImageModal">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                <form action="{% url 'upload_image' profile.id %}" method="POST" class="form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ editProfileForm }}
+                    <input id="saveEditProfile" type="submit" class="btn btn-primary mt-4" value="Save">
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/profile.js' %}"></script>
+    <script src="{% static 'network/index.js' %}"></script>
+{% endblock %}

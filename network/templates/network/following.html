@@ -1,0 +1,92 @@
+{% extends 'network/layout.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container">
+    <h3>Following</h3>
+    <hr />
+    {% if page_obj %}
+        {% for post in page_obj %}
+            <div class="row mb-3">
+                <div class="col-lg-9 postContainer">
+                    <div class="row justify-content-around my-2">
+                    <div class="col">
+                        <a href="{% url 'profile' post.poster.id %}">
+                        <img src="{{ post.poster.profile_image.url }}" width="40" height="40" class="rounded-circle mr-2">
+                        <span class="d-lg-inline mx-1 username">{{ post.poster }}</span>
+                        </a>
+                        <span class="d-block d-md-inline timestamp"> <small>{{ post.timestamp|date:"F j, Y f A" }}</small></span>
+                    </div>
+                    {% if post.poster.id == request.user.id %}
+                        <div class="col text-right">
+                        <div class="edit-button" data-id="{{ post.id }}" id="edit-button-{{ post.id }}"><i class="bi bi-pencil-square"></i></div>
+                        </div>
+                    {% endif %}
+                    
+                    </div>
+                    <div class="row mt-2 mb-4">
+                    <div class="col-12" id="post-content-{{ post.id }}" style="word-wrap:break-word;">{{ post.body }}</div>
+                    </div>
+                    <div class="row justify-content-between my-2 text-center">
+                    <div class="col">
+                        <div class="row">
+                        <div class="col-3 px-0 text-right">
+                            {% if request.user in post.likes.all %}
+                            <ion-icon name="heart" class="large-font active heart" id="like-{{ post.id }}" data-id="{{ post.id }}" data-action="unlike">
+                            </ion-icon>
+                            {% else %}
+                            <ion-icon name="heart" class="large-font heart" id="like-{{ post.id }}" data-id="{{ post.id }}" data-action="like">
+                            </ion-icon>
+                            {% endif %}
+                        </div>
+                        <div class="col-3 text-left" id="like-count-{{ post.id }}">
+                            {{ post.count_likes }}
+                        </div>
+                        </div>   
+                    </div>
+                    <div class="col" id="">
+                        <i class="bi bi-chat-right-text"></i>
+                        Comment
+                    </div>
+                    <div class="col" id="">
+                        <i class="bi bi-share-fill"></i>
+                        Share
+                    </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You currently do not follow any accounts.</p>
+    {% endif %}
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-9">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+    
+                {% for i in paginator.page_range %}
+                    <li class="page-item" id="page-{{ i }}"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endfor %}
+    
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                {% endif %}
+                </ul>
+            </nav>
+
+        </div>
+    </div>  
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/following.js' %}"></script>
+{% endblock %}

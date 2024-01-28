@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <script>
+            /*
+            */
+            document.addEventListener("DOMContentLoaded", function(){
+                document.querySelectorAll('.page').forEach(function(item){
+                    item.addEventListener("click", function(){
+                        localStorage.setItem("lastVisited", this.getAttribute("href"));
+                        console.log(localStorage.getItem("lastVisited"));
+                    })
+                    if (localStorage.getItem("lastVisited") === item.getAttribute("href")){
+                        item.classList.add('engaged');
+                    }
+                })
+            })
+        </script>
+        {% block script %}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="container-fluid overflow-hidden">
+            <div class="row vh-100 overflow-auto">
+                <div class="sidebar col-12 col-sm-3 col-xl-2 px-sm-2 px-0 bg-dark d-flex sticky-top">
+                    <div class="d-flex flex-sm-column flex-row flex-grow-1 align-items-center align-items-sm-start px-3 pt-2 text-white">
+                        <a href="/" class="d-flex align-items-center pb-sm-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                            <span class="fs-5">N<span class="d-none d-sm-inline">etwork</span></span>
+                        </a>
+                        <ul class="nav nav-pills flex-sm-column flex-row flex-nowrap flex-shrink-1 flex-sm-grow-0 flex-grow-1 mb-sm-auto mb-0 justify-content-around align-items-center align-items-sm-start" id="menu">
+                            <li class="nav-item">
+                                <a href="{% url 'index' %}" class="nav-link px-sm-0 px-2 page">
+                                    <i class="fs-5 bi-house mr-lg-2"></i><span class="ms-1 d-none d-sm-inline">All Post</span>
+                                </a>
+                            </li>
+                            {% if user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'following' %}" data-bs-toggle="collapse" class="nav-link px-sm-0 px-2 page">
+                                        <i class="bi bi-people-fill mr-lg-2"></i><span class="ms-1 d-none d-sm-inline">Following</span> </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'logout' %}" data-bs-toggle="collapse" class="nav-link px-sm-0 px-2">
+                                        <i class="bi bi-box-arrow-right mr-lg-2"></i><span class="ms-1 d-none d-sm-inline">Logout</span> </a>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'login' %}" class="nav-link px-sm-0 px-2">
+                                        <i class="bi bi-door-open-fill mr-lg-2"></i><span class="ms-1 d-none d-sm-inline">Log In</span></a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'register' %}" class="nav-link px-sm-0 px-2">
+                                        <i class="bi bi-r-square-fill mr-lg-2"></i><span class="ms-1 d-none d-sm-inline">Register</span></a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                        {% if user.is_authenticated %}
+                            <div class="dropdown py-sm-4 mt-sm-auto ms-auto mx-2 mx-md-0 ms-sm-0 flex-shrink-1" id="post-button-div">
+                                <button type="button" class="btn btn-primary rounded-pill" data-toggle="modal" data-target="#exampleModal" id="post-button">
+                                    Post
+                                </button>
+                            </div>
+                            <div class="dropdown py-sm-4 ms-auto ms-sm-0 flex-shrink-1">
+                                <a href="{% url 'profile' user.id %}" class="d-flex align-items-center text-white text-decoration-none page">
+               
+                                    <img src="{{ user.profile_image.url }}" width="40" height="40" class="rounded-circle mr-2">
+           
+                                    <span class="d-none d-sm-inline mx-1 username">{{ user.username }}</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="feed col d-flex flex-column h-sm-100 bg-dark">
+                    <main class="row overflow-auto">
+                        <div class="col pt-4">
+                            {% block body %}
+                            {% endblock %}
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content bg-dark">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">New Post</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:white;">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form action="{% url 'create' %}" method="POST" class="form">
+                    {% csrf_token %}
+                    {{ post_form }}
+                    <input type="submit" class="btn btn-primary" value="Post">
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    </body>
+</html>
+

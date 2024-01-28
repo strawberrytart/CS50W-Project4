@@ -1,0 +1,53 @@
+{% extends 'network/layout.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="container">
+    <h3>{{ profile.username }}: Following</h3>
+    <hr />
+    {% if following %}
+        {% for person in following %}
+            <div class="row mb-3">
+                <div class="col-lg-9 postContainer">
+                    <div class="row justify-content-around my-3">
+                        <div class="col">
+                            <a href="{% url 'profile' person.id %}">
+                                <img src="{{ person.profile_image.url }}" width="40" height="40" class="rounded-circle mr-2">
+                                <span class="d-lg-inline mx-1 username">{{ person.username }}</span>
+                            </a>
+                        </div>
+                        <div class="col text-right">
+                            {% if user.is_authenticated %}
+                                {% if person.id is not request.user.id %}
+                                    {% if person in request.user.following.all %}
+                                        <button id='follow-button' class="unfollow" data-id="{{ person.id }}">Unfollow</button>
+                                    {% else %}
+                                        <button id='follow-button' class="" data-id="{{ person.id }}">Follow</button>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col">
+                            {{ person.bio }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        {% if profile.id == request.user.id %}
+            You are not following anyone.
+        {% else %}
+            Account isn't following anyone.
+        {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}
