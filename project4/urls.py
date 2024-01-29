@@ -23,8 +23,10 @@ urlpatterns = [
     path("", include("network.urls")),
 ]
 
+"""
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+"""    
 #To serve user-uploaded media files from MEDIA_ROOT 
 #MEDIA_URL is the URL where users can access media files
 # setting MEDIA_URL never ever influence the absolute path to the directory where uploaded files are stored    
